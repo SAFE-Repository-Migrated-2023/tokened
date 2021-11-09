@@ -9,30 +9,42 @@
         <div id="navMenu" class="md:flex flex-grow bg-blue-50 md:bg-transparent" :class="navMenuClasses">
             <div class="md:flex ml-auto justify-end items-center">
             <a v-for="menuItem in menuItems" :key="menuItem.id" class="md:inline-block block p-2 m-3 font-semibold" :href="menuItem.link">{{menuItem.title}}</a>
+            <button v-if="loggedin" class="md:inline-block block p-2 m-3 font-semibold text-red-500" @click="logOut">Log Out</button>
             </div>
         </div>
     </nav>
 </div>
 </template>
 <script>
-export default {    
+export default {
     data() {
         return {
-            mobileMode: true
+            mobileMode: true,
         };
     },
     props: {
         logoName: String,
         menuItems: Array,
+        user: [Object, Boolean],
     },
     computed: {
         navMenuClasses() {
             return {hidden: this.mobileMode};
-        }
+        },
+        loggedin() {
+            return this.user.id;
+        },
+        
     },
     methods: {
         toggleMenu() {
             this.mobileMode = !this.mobileMode;
+        },
+        logOut() {
+            axios.post('/logout')
+            .then((response)=>{
+                window.location = response.data;
+            });
         }
     }
 }

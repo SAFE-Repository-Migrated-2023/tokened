@@ -229,6 +229,9 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
 
+        // aliases used by this demo:
+        'Carbon' => Illuminate\Support\Carbon::class,
+        'ClientSafeApi' => App\Helpers\ClientSafeApi::class,
     ],
 
 ];
