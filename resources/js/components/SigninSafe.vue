@@ -59,6 +59,9 @@ export default {
                     window.location.href = '/';
                 });
        }
+    },
+    created() {
+        this.check();
     }
 }
 </script>
