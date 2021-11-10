@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers\Auth;
 
+use Auth;
 use Validator;
 use App\Http\Requests\Auth\LoginSafeRequest;
 use App\Models\User;
 use App\Helpers\ClientSafeApi;
 use App\Helpers\CommonHelper;
 use App\Http\Controllers\Controller;
-
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class LoginController extends Controller
@@ -84,6 +83,12 @@ class LoginController extends Controller
             return response()->json($res);
         }
 
+        if(auth()->user()){
+            $res['error'] = true;
+            $res['error_message'] = 'Already logged in';
+            return response()->json($res);
+        }
+
         $signin = $this->safe_api->call('signin_status_check', ['transactionId' => $transactionId, 'access_token' => $access_token]);
         $r = json_decode($signin['json_body']);
 
@@ -112,8 +117,8 @@ class LoginController extends Controller
                 $safe_id = CommonHelper::cleanUsername($anchor_id);
                 $user = User::where('safe_id', $safe_id)->first();
                 if ($user) {
-                    $logged_in = auth()->login($user, true);
-                    $res['logged_in'] = $logged_in;
+                    Auth::login($user);
+                    $res['logged_in'] = true;
                 }
                 break;
             }

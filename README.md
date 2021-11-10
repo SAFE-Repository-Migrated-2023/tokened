@@ -40,6 +40,12 @@ You can run standalone seeder to create 3 new contacts with faker:
 php artisan db:seed
 ```
 
+Generate key and symbolic links to storage/app/images and public/storage
+```
+php artisan key:generate
+php artisan storage:link
+```
+
 ### Nginx / Apache
 Set web root to /public folder.
 

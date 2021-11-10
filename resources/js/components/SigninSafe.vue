@@ -20,37 +20,14 @@ export default {
             attempt: 0,
             progress: 0,
             message: null,
+            timer: ''
         }
     },
     methods: {
         check() {
             axios.post('/check', {aid: this.aid, _method: 'post'})
                 .then((response) => {
-                    let data = response.data;
-                    this.message = data.status;
-
-                    if (data.error){
-                        this.message = data.error_message;
-                        return;
-                    }
-
-                    if (data.status == 'AUTHORIZED' && data.logged_in){
-                        window.location.href = data.redirect;
-                        return;
-                    }
-
-                    this.progress = Math.round(100/12 * (this.attempt+1));
-                    this.attempt++;
-                    if(this.attempt < 12){
-                        setTimeout( () => {
-                            this.check();
-                        }, 1000);
-                    }
-
-                    //kill session
-                    if(this.attempt == 12){
-                        this.killSession();
-                    }
+                    this.testLogin(response);
                 });
        },
        killSession() {
@@ -58,10 +35,49 @@ export default {
                 .then(() => {
                     window.location.href = '/';
                 });
-       }
+       },
+       testLogin(response) {
+            let data = response.data;
+            this.message = data.status;
+
+            if (data.error){
+                this.clearTimer();
+                this.clearBar();
+                this.message = data.error_message;
+                return;
+            }
+
+            if (data.logged_in){
+                console.log('loggedin');
+                this.clearTimer();
+                this.maxBar();
+                window.location.href = data.redirect;
+                return;
+            }
+
+            this.progress = Math.round(100/12 * (this.attempt+1));
+            this.attempt++;
+
+            //kill session
+            if(this.attempt == 12){
+                this.message = 'TIMEOUT';
+                this.clearTimer();
+                this.clearBar();
+                this.killSession();
+            }
+        },
+        clearTimer() {
+            clearInterval(this.timer);
+        },
+        clearBar() {
+            this.progress = 0;
+        },
+        maxBar() {
+            this.progress = 100;
+        }
     },
     created() {
-        this.check();
+        this.timer = setInterval(this.check, 5000)
     }
 }
 </script>
