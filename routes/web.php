@@ -11,6 +11,9 @@ require __DIR__.'/auth.php';
 Route::get('/preregistered', [PublicController::class, 'preregistered'])->name('preregistered');
 Route::get('/pin', [PublicController::class, 'showPin'])->name('show_pin');
 
+//special route for unregister users from mobile app:
+Route::post('/unregister', [PublicController::class, 'unregister']);
+
 Route::group(['middleware' => 'auth'], function () {
     //this is resource controller but listing all actions for readability
     Route::get('/', [ContactController::class, 'index'])->name('contacts.index');

@@ -38,7 +38,7 @@ class PublicController extends Controller
         ]);
 
         $r = json_decode($check['json_body']);
-        if(isset($check['error']) && $check['error'] == true){
+        if (isset($check['error']) && $check['error'] == true) {
             return response()->json([
                 'status' => false,
                 'message' => $r->description ?? null,
@@ -46,7 +46,7 @@ class PublicController extends Controller
         }
 
         $access_token = $this->safe_api->getAccessToken($anchor_id);
-        if(!$access_token){
+        if (!$access_token) {
             return response()->json([
                 'status' => false,
                 'message' => 'no access token',
@@ -57,14 +57,14 @@ class PublicController extends Controller
         $details = $this->safe_api->call('consumer', ['aid' => $anchor_id, 'access_token' => $access_token]);
         $r = json_decode($details['json_body']);
 
-        if(isset($details['error']) && $details['error'] == true){
+        if (isset($details['error']) && $details['error'] == true) {
             return response()->json([
                 'status' => false,
                 'message' => $r->description ?? null,
             ], 422);
-        } 
+        }
 
-        if(isset($r->description->consumer)){
+        if (isset($r->description->consumer)) {
             $profile = $r->description->consumer;
         }
 
@@ -96,7 +96,7 @@ class PublicController extends Controller
         ]);
         $r = json_decode($details['json_body']);
 
-        if(isset($prompt['error']) && $prompt['error'] == true) {
+        if (isset($prompt['error']) && $prompt['error'] == true) {
             return response()->json([
                 'status' => false,
                 'message' => $r->description ?? null,
@@ -115,11 +115,37 @@ class PublicController extends Controller
             $safe_id = CommonHelper::cleanUsername($anchor_id);
         }
 
-        if(isset($status) && $status == 'PROCESS'){
+        if (isset($status) && $status == 'PROCESS') {
             $title = 'Login to your account';
             return view('auth.show-pin', compact('title', 'anchor_id', 'safe_id'));
         } else {
-            return redirect()->route('contacts.index')->with('error', 'Unable to init signin.'); 
+            return redirect()->route('contacts.index')->with('error', 'Unable to init signin.');
         }
+    }
+
+    public function unregister(Request $request)
+    {
+        //validator
+        $request->validate([
+            'safe_id' => 'required',
+            'token' => 'required',
+        ]);
+        $safe_id = CommonHelper::cleanUsername($request->safe_id);
+        $anchor_id = CommonHelper::normalizeUsername($safe_id);
+        $token = $request->token;
+        $client_id = config('safe.client_id');
+        $client_secret = config('safe.client_secret');
+
+        if (base64_decode($token) != $client_id.':'.$client_secret) {
+            return response()->json(['error' => 'unauthorized'], 401);
+        }
+
+        $user = User::where('safe_id', $safe_id)->firstOrFail();
+        $user->delete();
+
+        return response()->json([
+            'safe_id' => $anchor_id,
+            'client_id' => $client_id,
+        ]);
     }
 }
