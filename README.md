@@ -8,7 +8,7 @@ Clone the repo.
 
 
 ```
-git clone https://github.com/leoshore/tokened
+git clone https://github.com/Shoretg/tokened
 ```
 
 Run the install: 
